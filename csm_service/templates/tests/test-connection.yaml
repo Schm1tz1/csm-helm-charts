@@ -11,5 +11,5 @@ spec:
     - name: netcat
       image: busybox
       command: ['nc']
-      args: ['-z {{ include "csm-service.fullname" . }} {{ .Values.service.csm_min_port }}']
+      args: ['-z',  '{{ include "csm-service.fullname" . }}',  '{{ .Values.service.csm_min_port }}']
   restartPolicy: Never
