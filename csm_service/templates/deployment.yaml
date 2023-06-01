@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "csm-service.fullname" . }}
+  labels:
+    {{- include "csm-service.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "csm-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "csm-service.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "csm-service.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            {{- range untilStep (.Values.service.csm_min_port|int) (.Values.service.csm_max_port|int) 1 }}
+            - name: "csm-{{ . }}" 
+              containerPort: {{ . }}
+              protocol: TCP      
+            {{- end }}
+            - name: http
+              containerPort: {{ .Values.service.http_port }}
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 40001
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 40001
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          volumeMounts:
+            {{ range $k, $v := .Values.volumeMounts }}
+            - name: {{ $v.name | quote }}
+              mountPath: {{ $v.mountPath | quote }}
+            {{- end }}
+          env:          
+            {{ range $k, $v := .Values.env }}
+            - name: {{ $v.name | quote }}
+              value: {{ $v.value | quote }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+          {{ range $k, $v := .Values.volumes }}
+          - name: {{ $v.name | quote }}
+            {{ if $v.secretRef }}
+            secret:
+              secretName: {{ $v.secretRef | quote }}   
+            {{- end }}  
+            {{ if $v.csiSecretProviderClass }}
+            csi:
+              driver: secrets-store.csi.k8s.io
+              readOnly: true
+              volumeAttributes: 
+                secretProviderClass: {{ $v.csiSecretProviderClass }}  
+            {{- end }}  
+          {{- end }}  

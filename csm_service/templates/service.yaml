@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "csm-service.fullname" . }}
+  labels:
+    {{- include "csm-service.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    {{- range untilStep (.Values.service.csm_min_port|int) (.Values.service.csm_max_port|int) 1 }}
+    - port: {{ . }}
+      targetPort: "csm-{{ . }}"
+      protocol: TCP
+      name: "csm-{{ . }}"
+    {{- end }}
+    - port: 40001
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "csm-service.selectorLabels" . | nindent 4 }}
