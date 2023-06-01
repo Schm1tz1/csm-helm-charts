@@ -36,7 +36,7 @@ securityContext: {}
   # runAsUser: 1000
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
   # This will allow to open the port range and create the services for up to 50 ports (common for Confluent Cloud Basic Clusters)
   csm_min_port: 30001
   csm_max_port: 30050
