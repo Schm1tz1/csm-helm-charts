@@ -11,4 +11,10 @@ kubectl create secret generic \
 
 # Deploy HELM Chart
 helm install csm-helm-test csm_service/ --values csm-service/values.yaml
+
+# Watch the events while the deployment starts
+kubectl get events -A -L app.kubernetes.io/instance=csm-helm-test -w
+
+# Once running, check the logs of CSM
+kubectl logs -l app.kubernetes.io/instance=csm-helm-test --all-containers -f
 ```
