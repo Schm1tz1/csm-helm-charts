@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   repository: your_docker_repo_and_image_goes_here 
   pullPolicy: IfNotPresent
-  tag: csm_version_goes_here
+  # tag: csm_version_goes_here
 
 imagePullSecrets: []
 nameOverride: ""
@@ -37,8 +37,10 @@ securityContext: {}
 
 service:
   type: ClusterIP
+  # This will allow to open the port range and create the services for up to 50 ports (common for Confluent Cloud Basic Clusters)
   csm_min_port: 30001
   csm_max_port: 30050
+  # This will open the port and create a service for the healthcheck-port
   http_port: 40001
 
 env:
