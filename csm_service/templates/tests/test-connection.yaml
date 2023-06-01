@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "csm-service.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "csm-service.fullname" . }}:{{ .Values.service.http_port }}']
   restartPolicy: Never
