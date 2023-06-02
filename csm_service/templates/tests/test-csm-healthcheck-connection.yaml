@@ -11,6 +11,6 @@ spec:
     - name: netcat
       image: busybox
       command: ['wget']
-      args: ['-z',  '{{ include "csm-service.fullname" . }}',  '{{ .Values.service.http_port }}']
+      args: ['{{ include "csm-service.fullname" . }}:{{ .Values.service.http_port }}/health']
   restartPolicy: Never
   
