@@ -39,19 +39,25 @@ spec:
               containerPort: {{ . }}
               protocol: TCP      
             {{- end }}
-            - name: http
+            - name: csm-health
               containerPort: {{ .Values.service.http_port }}
               protocol: TCP
           readinessProbe:
             httpGet:
               path: /health
-              port: 40001
+              port: csm-health
+            periodSeconds: 5
           livenessProbe:
             httpGet:
               path: /health
-              port: 40001
-            initialDelaySeconds: 10
+              port: csm-health
             periodSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /health
+              port: csm-health
+            failureThreshold: 10
+            periodSeconds: 3          
           volumeMounts:
             {{ range $k, $v := .Values.volumeMounts }}
             - name: {{ $v.name | quote }}

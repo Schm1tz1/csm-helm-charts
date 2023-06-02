@@ -14,8 +14,8 @@ spec:
       name: "csm-{{ . }}"
     {{- end }}
     - port: 40001
-      targetPort: http
+      targetPort: csm-health
       protocol: TCP
-      name: http
+      name: csm-health
   selector:
     {{- include "csm-service.selectorLabels" . | nindent 4 }}
