@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "csm-service.fullname" . }}-test-healthcheck-port"
+  labels:
+    {{- include "csm-service.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: netcat
+      image: busybox
+      command: ['wget']
+      args: ['-z',  '{{ include "csm-service.fullname" . }}',  '{{ .Values.service.http_port }}']
+  restartPolicy: Never
+  
